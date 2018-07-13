@@ -1,0 +1,2 @@
+level00 interprete le password comme un int grace a un scanf.
+Celui-ci est compare a 0x149c soit 5276. Avec le password 5276 on entre bien dans le if qui fait un system.

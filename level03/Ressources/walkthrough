@@ -1,0 +1,8 @@
+La fonction decrypt de level03 utilise un xor sur chaque charactere de la chaine cryptee pour la decrypter.
+Or on a la chaine cryptee qui est "Q}|u`sfg~sf{}|a3" et on a aussi la chaine decryptee que l'on est cense optenir : "Congratulations!".
+Pour savoir quel est le nombre qu'attend decrypte on peut faire un xor entre la premiere lettre de chacune des deux chaines.
+Faisont Q (0x51) ^ C (0x43) = 0x12 = 18
+Si l'on passe 18 a decrypt on accede au /bin/sh.
+On peut le faire aisement puisque test soustrait le password donne a 0x1337d00d soit 322424845
+322424845 - 18 = 322424827
+Si on lui passe 322424827 test fera 322424845 - 322424827 = 18 et passera 18 a decrypt. C'est gagne !

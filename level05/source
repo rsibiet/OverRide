@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+  int i;          //esp+0x8c
+  char buff[];    // esp+0x28
+
+  i = 0;
+  fgets(buff, 100, STDIN);
+  i = 0;
+  while (i < strlen(buff))
+  {
+    if (buff[i] <= 90)
+      buff[i] = buff[i] ^ 32;   // xor
+    i++;
+  }
+  printf(buff);
+  exit(0);
+}

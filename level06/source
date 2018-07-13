@@ -1,0 +1,65 @@
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int   auth(char *login, int serial)
+{
+  int len;                // ebp-0xc
+  int val;                // ebp-0x10
+  int i;                  // ebp-0x14
+
+  *strcspn(login ,"\n") = '\0';   // ebp+0x8
+  len = strnlen(login, 32);
+  if (len <= 5)
+    return (1);
+  if (ptrace(0, 0, 1, 0) == -1)   // 0xffffffff
+  {
+    puts("\033[32m.---------------------------."); // 0x8048a68
+    puts("\033[31m| !! TAMPERING DETECTED !!  |"); // 0x8048a8c
+    puts("\033[32m'---------------------------'"); // 0x8048ab0
+    return (1);
+  }
+  val = (login + 3) ^ 0x1337 + 0x5eeded;
+  i = 0;
+  while (i < len)
+  {
+    if (login[i] <= 31)       // 0x1f
+      return (1);
+    val += (((login[i] ^ val * 0x88233b2b - 0x88233b2b) >> 1 + 0x88233b2b) >> 0xa) * 0x539;
+    i++;
+  }
+  if (val == serial)
+    return (0);
+  return (1);
+}
+
+int   main()
+{
+  char login[];               // esp+0x2c
+  int serial;                 // esp+0x28
+
+  puts("***********************************");     // 0x8048ad4
+  puts("*              level06            *");     // 0x8048af8
+  puts("***********************************");     // 0x8048ad4
+  printf("-> Enter Login:");  // 0x8048b08
+
+  fgets(login, 32, STDIN);
+
+  puts("***********************************");     // 0x8048ad4
+  puts("***** NEW ACCOUNT DETECTED ********");     // 0x8048b1c
+  puts("***********************************");     // 0x8048ad4
+  printf("-> Enter Serial:"); // 0x8048b40
+  scanf("%u", serial);        // 0x8048a60
+
+  if (auth(login, serial) == 0)
+  {
+    puts("Authenticated!");   // 0x8048b52
+    system("/bin/sh");        // 0x8048b61
+    stack_chk_fail()          // canary
+    return (0);
+  }
+  stack_chk_fail()            // canary
+  return (1);
+}

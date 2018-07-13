@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <string.h>
+
+void    clear_stdin()
+{
+  int c;               // ebp-0x9
+  c = 0;
+
+  c = getchar();
+  while (c != '\n' && c != 0xff)
+    c = getchar();
+}
+
+int     get_unum()
+{
+  int nb;              // ebp-0xc
+  nb = 0;
+
+  fflush(STDOUT);      // 0x804a060
+  scanf("%u", nb)      // 0x8048ad0
+  clear_stdin();
+  return(nb);
+}
+
+int     store_number(char *buff)
+{
+  int nb;              // ebp-0x10
+  int index; // ebp-0xc
+
+  printf(" Number: "); // 0x8048ad3
+  nb = get_unum();
+  printf(" Index: ");  // 0x8048add
+  index = get_unum();
+
+  if (index - (index * 0xaaaaaaab >> 1) * 3 == 0 || nb >> 24 == 183)
+  {
+    puts(" *** ERROR! ***");                     // 0x8048ae6
+    puts("   This index is reserved for wil!");  // 0x8048af8
+    puts(" *** ERROR! ***");                     // 0x8048ae6
+    return (1);
+  }
+  buff[index] = nb;
+  return (0);
+}
+
+int     read_number(char *buff)
+{
+  int nb;              // ebp-0xc
+
+  nb = 0;
+  printf(" Index: ");  // 0x8048add
+  nb = get_unum();
+  printf(" Number at data[%u] is %u\n", nb, buff[nb]); // 0x8048b1b
+  return (0);
+}
+
+int     main(int argc, char **argv, char **environment)
+{
+  char **av;           // esp+0x1c
+  char **env;          // ebp+0x18
+  char buff[];         // esp+0x24
+  char input[];        // esp+0x1b8
+  int i;               // esp+0x14
+  int u;               // esp+0x1b4
+
+  av = argv;
+  env = environment;
+  memset(buff, '\0', 100);
+  while (buff != NULL)
+  {
+    i = -1;
+    memset(av, '\0', sizeof(av));
+    buff++;
+  }
+  while (env != NULL)
+  {
+    i = -1;
+    memset(env, '\0', sizeof(env));
+    env++;
+  }
+  puts('-' <repeats 52 times>, "\n  Welcome to wil's crappy number storage service!   \n", '-' <repeats 52 times>, "\n Commands:", ' ' <repeats 31 times>...);                                    // 0x8048b38
+  printf("Input command: ");                     // 0x8048d4b
+
+  while (1)
+  {
+    u = 1;
+    fgets(input, 20, STDIN);
+    i = -1;
+    input[strlen(input) - 1] = '\0';
+    if (strncmp(input, "store", 5) == 0)         // 0x8048d5b
+      store_number(buff);
+    else if (strncmp(input, "read", 4) == 0)     // 0x8048d61
+      read_number(buff);
+    else if (strncmp(input, "quit", 4) == 0)     // 0x8048d66
+      break ;
+    if (u != 0)
+      printf(" Failed to do %s command\n", input); // 0x8048d6b
+    else
+      printf(" Completed %s command successfully\n", input); // 0x8048d88
+  }
+
+  stack_chk_fail();    // Canary
+  return (0);
+}

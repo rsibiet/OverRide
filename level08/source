@@ -1,0 +1,67 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void    log_wrapper(FILE *fdw, char *message, char *file)
+{
+  //        rbp-0x118     rbp-0x120   rbp-0x128
+  char out[];              // rbp-0x110
+  int cpylen;              // rbp-0x130
+
+  strcpy(out, message);
+  len = strlen(cpy);
+  snprintf(cpy + len, strlen(file), file);
+  strcspn(out, "\n") = '\0';      // 0x400d4c
+  fprintf(fdw, "LOG: %s\n", out); // 0x400d4e
+  stack_chk_fail();               // Canary
+}
+
+int     main(int argc, char **argv)
+{
+  int ac;                  // rbp-0x94
+  char **av;               // rbp-0xa0
+  FILE *fdw;               // rbp-0x88
+  FILE *fdr;               // rbp-0x80
+  FILE *fd;                // rbp-0x78
+  char path[];             // rbp-0x70
+
+  ac = argc;
+  av = argv;
+
+  if (ac != 2)
+    printf("Usage: %s filename\n", av[0]); // 0x400d57
+
+  fdw = fopen("./backups/.log", "w");      // 0x400d6d 0x400d6b
+  if (fd == 0)
+  {
+    printf("ERROR: Failed to open %s\n", "./backups/.log"); // 0x400d7c 0x400d6d
+    exit(1);
+  }
+
+  log_wrapper(fdw, "Starting back up: ", av[1]); // 0x400d96
+  fdr = fopen(av[1], "r"); // 0x400da9
+
+  if (fdr == 0)
+  {
+    printf("ERROR: Failed to open %s\n", av[1]); // 0x400d7c
+    exit(1);
+  }
+
+  path = "./backups/";     // 0x400dab
+  strncat(path, av[1], strlen(av[1]);
+  fd = open(path, 0xc1, 0x1b0);
+
+  if (fd < 0)
+  {
+    printf("ERROR: Failed to open %s%s\n", "./backups/", av[1]); // 0x400db6 0x400dab
+    exit(1);
+  }
+  while (fgetc(fdr) != -1)
+    write(fd, c, 1);
+
+  log_wrapper(fdw, "Finished back up ", av[1]);  // 0x400dd2
+  fclose(fdr);
+  close(fd);
+
+  stack_chk_fail();        // Canary
+}

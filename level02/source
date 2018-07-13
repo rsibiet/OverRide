@@ -1,0 +1,64 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+main(int argc, char **argv)
+{
+  int   ac;
+  char  **av;
+
+  char username[112];          // rbp-0x70
+  char flag[48];               // rbp-0xa0
+  char password[112];          // rbp-0x110
+  int len;
+  FILE *fd;
+
+  ac = argc;
+  av = argv;
+
+  memset(username, '\0', 12);
+  memset(flag, '\0', 5);
+  memset(password, '\0', 12);
+
+  len = 0;
+
+  fd = fopen("/home/users/level03/.pass", "r");                     // 0x400bb2 0x400bb0
+  if (fd == 0)
+  {
+    fwrite("ERROR: failed to open password file\n", 1, 36, STDERR); // 0x400bd0
+    exit(1);
+  }
+  len = fread(flag, 1, 41, fd);
+  flag[strcspn(flag, "\n")] = '\0';
+  if (len != 41)
+  {
+    fwrite("ERROR: failed to read password file\n", 1, 36, STDERR); // 0x400bf8
+    fwrite("ERROR: failed to read password file\n", 1, 36, STDERR); // 0x400bf8
+    exit(1);
+  }
+  fclose(fd);
+
+  puts("===== [ Secure Access System v1.0 ] =====");                // 0x400c20
+  puts("/", '*' <repeats 39 times>, "\\");                          // 0x400c50
+  puts("| You must login to access this system. |");                // 0x400c80
+  puts("\\", '*' <repeats 38 times>, "/");                          // 0x400cb0
+
+  printf("--[ Username: ");                        // 0x400cd9
+  fgets(username, 100, STDIN);
+  username[strcspn(username, "\n")] = '\0';
+
+  printf("--[ Password: ");                        // 0x400ce8
+  fgets(password, 100, STDIN);
+  password[strcspn(password, "\n")] = '\0';
+
+  puts("*****************************************"); // 0x400cf8
+  if (strncmp(password, flag, 41) == 0)
+  {
+    printf("Greetings, %s!\n");                    // 0x400d22
+    system("/bin/sh");                             // 0x400d32
+    return (0);
+  }
+  printf(username);
+  puts(" does not have access!");                  // 0x400d3a
+  exit(1);
+}

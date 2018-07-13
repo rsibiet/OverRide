@@ -1,0 +1,50 @@
+#include <string.h>
+#include <unistd.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <signal.h>
+
+int   main(void)
+{
+  pid_t pid;      // esp+0xac
+  char str[];     // esp+0x20
+  int i;          // esp+0xa8
+  int time;       // esp+0x1c
+  int tmp;        // esp+0xa0
+  int tmp2;       // esp+0xa4
+
+  pid = fork();
+  memset(str, '\0', 32);
+  i = 0;
+  time = 0;
+  if (pid == 0)   // if is child
+  {
+    prctl(PR_SET_PDEATHSIG, 1);
+    ptrace(PTRACE_TRACEME, 0, 0, 0);
+    puts("Give me some shellcode, k");  // 0x8048903
+    gets(str);
+    return (0);
+  }
+  while (i != 11)
+  {
+    wait(time);
+    tmp = time;
+    if (tmp & 127 == 0)                 // 0x7f
+    {
+      puts("child is exiting...");      // 0x804891d
+      return (0);
+    }
+    tmp2 = time;
+    if (((tmp2 & 127) + 1) >> 1 > 0)    // >> operator for sar
+    {
+      puts("child is exiting...");      // 0x804891d
+      return (0);
+    }
+    i = ptrace(3, pid, 44, 0);
+  }
+  puts("no exec() for you");            // 0x8048931
+  kill(pid, 9);
+}

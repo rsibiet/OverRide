@@ -1,0 +1,50 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+int   decrypt(int nb)
+{
+  char str[] = "Q}|u`sfg~sf{}|a3";  // ebp-0x1d
+  int len;                          // ebp-0x24
+  int i;                            // ebp-0x28
+
+  len = strlen(str);
+  i = 0;
+  while (i < len)
+  {
+    str[i] = nb ^ str[i];           // ^ = xor operator
+    i++;
+  }
+  if (strncmp(str, "Congratulations!", 17) == 0)  // 0x80489c3
+    system("/bin/sh"); // 0x80489d4
+  else
+    puts("\nInvalid Password");     // 0x80489dc
+  stack_chk_fail();                 // Check canary
+}
+
+int   test(int nb, int max)
+{
+  int res;
+  int ret;
+
+  res = max - nb;
+  if ((res <= 9 && res >= 1) || (res <= 21 && res >= 16))
+    ret = decrypt(res);
+  else
+    ret = decrypt(rand());
+  return (ret);
+}
+
+int   main(void)
+{
+  int nb;
+
+  srand(time(0));
+  puts("***********************************");    // 0x8048a48
+  puts("*               level03         **");     // 0x8048a6c
+  puts("***********************************");    // 0x8048a48
+  printf("Password:")               // 0x8048a7b
+  scanf("%d", nb)
+  test(nb, 322424845)               // 0x1337d00d
+  return (0);
+}

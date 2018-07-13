@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+main(int argc, char **argv)
+{
+  int pass;
+
+  puts("***********************************"); // 0x80485f0
+  puts("*            -Level00 -           *"); // 0x8048614
+  puts("***********************************"); // 0x80485f0
+  printf("Password:");                         // 0x804862c
+
+  scanf("%d", &pass);
+  if (pass == 5276)                            // 0x149c
+  {
+    puts("Authenticated!");                    // 0x8048639
+    system("/bin/sh");                         // 0x8048649
+    return (0);
+  }
+  puts("\nInvalid Password!")                // 0x8048651
+  return (1);
+}

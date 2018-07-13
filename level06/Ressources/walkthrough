@@ -1,0 +1,15 @@
+On a un main qui va bien vouloir nous faire un system si la fonction auth lui retourne 0.
+La fonction auth va, a partir du login, calculer le serial, puis renvoyer 0 si et seulement si le serial calcule correspond a celui donne.
+Il n'y a pas de variable aleatoir, donc un login correspond toujours au meme serial.
+On va donc essayer d'aller voir la valeur calculee par auth.
+Le fonction auth fait un ptrace, il va donc falloir passer par dessus pour que l'on puisse faire nos petites verifications.
+On ajoute deux breakpoints,
+ - Le premier a *auth+114 pour modifier le retour de ptrace et donc pouvoir continuer a utiliser gdb.
+ - Le deuxieme a *auth+286 au moment ou le veritable serial est compare au notre.
+b *auth+109
+b *auth+286
+run
+jump *auth+114
+x/w $ebp-0x10
+
+Pour le login Antoine on obtient le serial 6233804. On test et ca fonctionne !

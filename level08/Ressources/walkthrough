@@ -1,0 +1,13 @@
+level08 effectue une copie du fichier passer en paramettre et le place dans la meme arborescence dans le dossier backup.
+Plusieurs element sont necessaire pour que la copie ait lieu :
+ - Il faut que le dossier ./backups existe afin que le programme puisse tranquillement creer et utiliser le fichier .log qui s'y trouve.
+ - Il faut que le chemin vers le fichier passe en argument soit valide.
+ - Il faut que le chemin passe en argument soit present dans le dossier backup. Sans quoi le open ne fonctionnera pas, le fichier ne sera pas cree.
+On s'interesse au ficher .pass du level09.
+Comme on s'interresse a /home/users/level09/.pass il faut creer l'arborescence dans backups.
+Nous n'avons pas les droits d'ecriture dans le home de level08 on va donc dans /tmp.
+cd /tmp
+mkdir -p backups/home/users/level09
+~/level08 /home/users/level09/.pass
+cat backups/home/users/level09/.pass
+L'operation fonctionne !
